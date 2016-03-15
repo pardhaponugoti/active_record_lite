@@ -26,12 +26,8 @@ class BelongsToOptions < AssocOptions
     options = defaults.merge(options)
 
     @foreign_key = options[:foreign_key]
-    @class_name = options[:class_name]
+    @class_name = options[:class_name].to_s
     @primary_key = options[:primary_key]
-
-    assoc_options[name] = {foreign_key: @foreign_key,
-                            class_name: @class_name,
-                            primary_key: @primary_key}
   end
 end
 
@@ -52,6 +48,7 @@ module Associatable
   # Phase IIIb
   def belongs_to(name, options = {})
     options = BelongsToOptions.new(name, options)
+    assoc_options[name] = options
     define_method(name) do
       options.model_class.where(options.
         primary_key => self.send(options.foreign_key)).first
@@ -67,11 +64,10 @@ module Associatable
   end
 
   def assoc_options
-    @assoc_options ||={}
+    @assoc_options ||= {}
   end
 end
 
 class SQLObject
   extend Associatable
-  # Mixin Associatable here...
 end
